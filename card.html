@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ڤودافون - الكروت المجانية</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
+
+    :root {
+        --main-red: #e11;
+        --dark-red: #a00;
+        --light-red: #f33;
+        --gold: #FFD700;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Tajawal', sans-serif;
+    }
+
+    body {
+        background: linear-gradient(135deg, #0f172a, #1e293b);
+        min-height: 100vh;
+    }
+
+    .background-shapes {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        z-index: 0;
+    }
+
+    .shape {
+        position: absolute;
+        filter: blur(80px);
+        opacity: 0.15;
+        animation: floatShape 20s ease-in-out infinite;
+    }
+
+    .shape-1 {
+        background: var(--main-red);
+        width: 300px;
+        height: 300px;
+        top: -150px;
+        right: -150px;
+    }
+
+    .shape-2 {
+        background: var(--dark-red);
+        width: 400px;
+        height: 400px;
+        bottom: -200px;
+        left: -200px;
+    }
+
+    .shape-3 {
+        background: var(--light-red);
+        width: 250px;
+        height: 250px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    @keyframes floatShape {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        25% { transform: translate(50px, 50px) rotate(90deg); }
+        50% { transform: translate(0, 100px) rotate(180deg); }
+        75% { transform: translate(-50px, 50px) rotate(270deg); }
+    }
+
+    .content {
+        width: 100%;
+        max-width: 1200px;
+        min-height: 100vh;
+        margin: 0 auto;
+        padding: 2rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .vodafone-title {
+        position: relative;
+        color: var(--main-red);
+        font-size: 3rem;
+        text-align: center;
+        margin: 2rem 0;
+        text-shadow: 0 0 20px rgba(225, 17, 17, 0.5);
+        animation: glow 2s ease-in-out infinite alternate;
+    }
+
+    .decoration {
+        position: absolute;
+        width: 150px;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, var(--light-red), var(--main-red), var(--light-red), transparent);
+        bottom: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-radius: 3px;
+        animation: decorationGlow 2s ease-in-out infinite;
+    }
+
+    @keyframes decorationGlow {
+        0%, 100% { opacity: 1; width: 150px; }
+        50% { opacity: 0.6; width: 100px; }
+    }
+
+    @keyframes glow {
+        from { text-shadow: 0 0 10px rgba(225, 17, 17, 0.5); }
+        to { text-shadow: 0 0 30px rgba(225, 17, 17, 0.8); }
+    }
+
+    .stars {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .star {
+        position: absolute;
+        background: #fff;
+        border-radius: 50%;
+        filter: blur(1px);
+        animation: twinkle var(--duration) ease-in-out infinite;
+    }
+
+    .star.small { width: 1px; height: 1px; }
+    .star.medium { width: 2px; height: 2px; }
+    .star.large { width: 3px; height: 3px; }
+
+    @keyframes twinkle {
+        0%, 100% { opacity: var(--opacity); transform: scale(1); }
+        50% { opacity: 0.2; transform: scale(0.5); }
+    }
+
+    .floating-button {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        background: linear-gradient(135deg, var(--main-red), var(--dark-red));
+        color: white;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(225, 17, 17, 0.3);
+        transition: all 0.3s ease;
+        z-index: 1000;
+        border: none;
+        cursor: pointer;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .floating-button:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(225, 17, 17, 0.4);
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .cards-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        padding: 2rem;
+        position: relative;
+        z-index: 2;
+        padding-bottom: 120px;
+    }
+
+    .card {
+        background: linear-gradient(135deg, #ff0000, #cc0000);
+        border-radius: 15px;
+        padding: 1.5rem;
+        color: white;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        position: relative;
+        overflow: hidden;
+        border: 2px solid var(--gold);
+        min-height: 280px;
+        transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+    }
+
+    .new-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: var(--gold);
+        color: #cc0000;
+        padding: 0.3rem 0.8rem;
+        border-radius: 15px;
+        font-weight: bold;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+
+    .card::before {
+        content: '';
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        right: 5px;
+        bottom: 5px;
+        border: 1px solid rgba(255, 215, 0, 0.5);
+        border-radius: 12px;
+        pointer-events: none;
+    }
+
+    .card-header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        color: white;
+        text-align: center;
+    }
+
+    .code-display {
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        direction: ltr;
+        text-align: center;
+        color: #666;
+        font-family: monospace;
+        font-size: 1.2rem;
+        letter-spacing: 0px;
+        position: relative;
+    }
+
+    .copy-btn {
+        position: absolute;
+        top: 50%;
+        right: 10px;
+        transform: translateY(-50%);
+        background: white;
+        border: none;
+        padding: 0.5rem;
+        border-radius: 5px;
+        cursor: pointer;
+        color: var(--main-red);
+        transition: all 0.3s ease;
+    }
+
+    .copy-btn:hover {
+        background: var(--gold);
+        color: white;
+    }
+
+    .units-display {
+        background: white;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        display: inline-block;
+        color: #666;
+        margin-bottom: 1rem;
+    }
+
+    .countdown {
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: var(--gold);
+        font-size: 0.9rem;
+        width: 100%;
+        text-align: center;
+    }
+
+    .decorative-elements {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+
+    .ramadan-text {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        color: var(--gold);
+        font-size: 0.9rem;
+    }
+
+    .website-url {
+        position: absolute;
+        bottom: 40px;
+        left: 10px;
+        color: white;
+        font-size: 0.9rem;
+    }
+
+    .islamic-pattern {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        background: 
+            linear-gradient(45deg, transparent 45%, rgba(255,215,0,0.1) 50%, transparent 55%),
+            linear-gradient(-45deg, transparent 45%, rgba(255,215,0,0.1) 50%, transparent 55%);
+    }
+
+    .lantern {
+        position: absolute;
+        bottom: 20%;
+        left: 10%;
+        color: var(--gold);
+        font-size: 2rem;
+    }
+
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+
+    .create-card-modal {
+        background: linear-gradient(135deg, #1e293b, #0f172a);
+        padding: 2rem;
+        border-radius: 15px;
+        width: 90%;
+        max-width: 500px;
+        position: relative;
+        border: 2px solid var(--main-red);
+        box-shadow: 0 0 30px rgba(225, 17, 17, 0.3);
+    }
+
+    .close-modal {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+    }
+
+    .incentive-text {
+        color: var(--gold);
+        text-align: center;
+        margin: 1rem 0;
+        line-height: 1.6;
+        font-size: 1.1rem;
+        padding: 1rem;
+        border: 1px solid var(--gold);
+        border-radius: 10px;
+        background: rgba(255, 215, 0, 0.1);
+    }
+
+    .input-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .input-group label {
+        display: block;
+        margin-bottom: 0.8rem;
+        color: #fff;
+        font-weight: 500;
+    }
+
+    .input-group input {
+        width: 100%;
+        padding: 1rem;
+        background: #0f172a;
+        border: 2px solid var(--main-red);
+        border-radius: 10px;
+        color: white;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+    }
+
+    .input-group input:focus {
+        outline: none;
+        border-color: var(--gold);
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    }
+
+    .error-message {
+        color: var(--gold);
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+        text-align: center;
+        display: none;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .submit-btn {
+        background: linear-gradient(135deg, var(--main-red), var(--dark-red));
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 10px;
+        cursor: pointer;
+        width: 100%;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        margin-top: 1rem;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(225, 17, 17, 0.4);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+        .vodafone-title {
+            font-size: 2.5rem;
+        }
+        
+        .floating-button {
+            width: 50px;
+            height: 50px;
+            font-size: 1.2rem;
+            right: 1rem;
+            bottom: 1rem;
+        }
+
+        .card {
+            min-height: 220px;
+            padding: 1rem;
+        }
+
+        .cards-container {
+            padding-bottom: 90px;
+        }
+
+        .incentive-text {
+            font-size: 1rem;
+            padding: 0.8rem;
+        }
+    }
+    </style>
+</head>
+<body>
+    <div class="background-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <div class="stars"></div>
+
+    <div class="content">
+        <h1 class="vodafone-title">
+            Vodafone
+            <div class="decoration"></div>
+        </h1>
+        <div class="cards-container"></div>
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="create-card-modal">
+            <button class="close-modal">&times;</button>
+            <div class="card-header">
+                <h2>شانشاء بطاقة جديدة</h2>
+            </div>
+            <div class="incentive-text">
+                انشر كارت الآن وزد فرصك للفوز بشحنة مجانية! كلما شاركت أكثر، زادت فرصك في دخول السحب والفوز بالجائزة. لا تفوّت الفرصة!
+            </div>
+            <div class="input-group">
+                <label for="cardCode">كود البطاقة (13 رقمًا):</label>
+                <input type="text" id="cardCode" placeholder="أدخل الكود هنا" maxlength="13" inputmode="numeric">
+            </div>
+            <div class="input-group">
+                <label for="cardUnits">عدد الوحدات (4 أرقام كحد أقصى):</label>
+                <input type="number" id="cardUnits" placeholder="أدخل عدد الوحدات" min="1" max="9999" inputmode="numeric">
+            </div>
+            <div class="error-message" id="errorMessage"></div>
+            <button class="submit-btn" id="createCardBtn">إنشاء البطاقة</button>
+        </div>
+    </div>
+
+    <button class="floating-button">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <script>
+    const starsContainer = document.querySelector('.stars');
+    const numberOfStars = 150;
+
+    for (let i = 0; i < numberOfStars; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+
+        const size = Math.random();
+        if (size < 0.5) star.classList.add('small');
+        else if (size < 0.8) star.classList.add('medium');
+        else star.classList.add('large');
+
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.top = `${Math.random() * 100}%`;
+        star.style.setProperty('--duration', `${2 + Math.random() * 4}s`);
+        star.style.setProperty('--opacity', `${0.5 + Math.random() * 0.5}`);
+        starsContainer.appendChild(star);
+    }
+
+    const floatingBtn = document.querySelector('.floating-button');
+    const modalOverlay = document.getElementById('modalOverlay');
+    const closeModalBtn = document.querySelector('.close-modal');
+    const createCardBtn = document.getElementById('createCardBtn');
+    const cardsContainer = document.querySelector('.cards-container');
+    const errorMessage = document.getElementById('errorMessage');
+
+    floatingBtn.addEventListener('click', () => {
+        modalOverlay.style.display = 'flex';
+        document.getElementById('cardCode').focus();
+    });
+
+    closeModalBtn.addEventListener('click', () => {
+        modalOverlay.style.display = 'none';
+        errorMessage.style.display = 'none';
+    });
+
+    modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) {
+            modalOverlay.style.display = 'none';
+            errorMessage.style.display = 'none';
+        }
+    });
+
+    document.getElementById('cardCode').addEventListener('input', function(e) {
+        this.value = this.value.replace(/[^0-9]/g, '').slice(0, 13);
+    });
+
+    document.getElementById('cardUnits').addEventListener('input', function(e) {
+        this.value = this.value.replace(/[^0-9]/g, '').slice(0, 4);
+        if (this.value > 9999) this.value = 9999;
+    });
+
+    function showError(message) {
+        errorMessage.textContent = message;
+        errorMessage.style.display = 'block';
+        setTimeout(() => {
+            errorMessage.style.opacity = '0';
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+                errorMessage.style.opacity = '1';
+            }, 300);
+        }, 3000);
+    }
+
+    function copyCode(code) {
+        navigator.clipboard.writeText(code).then(() => {
+            alert('تم نسخ الكود بنجاح!');
+        }).catch(err => {
+            console.error('Failed to copy code:', err);
+        });
+    }
+
+    function formatTime(seconds) {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    createCardBtn.addEventListener('click', () => {
+        const code = document.getElementById('cardCode').value;
+        const units = document.getElementById('cardUnits').value;
+
+        if (!code || !units) {
+            showError('الرجاء ملء جميع الحقول');
+            return;
+        }
+
+        if (code.length !== 13) {
+            showError('الكود يجب أن يكون 13 رقمًا');
+            return;
+        }
+
+        if (units < 1 || units > 9999) {
+            showError('عدد الوحدات يجب أن يكون بين 1 و 9999');
+            return;
+        }
+
+        createCard(code, units);
+        modalOverlay.style.display = 'none';
+        errorMessage.style.display = 'none';
+        document.getElementById('cardCode').value = '';
+        document.getElementById('cardUnits').value = '';
+    });
+
+    function createCard(code, units) {
+        const card = document.createElement('div');
+        card.className = 'card';
+        
+        const newBadge = document.createElement('div');
+        newBadge.className = 'new-badge';
+        newBadge.textContent = 'جديد';
+        
+        const cardContent = `
+            <div class="islamic-pattern"></div>
+            <span class="ramadan-text">رمضان مبارك</span>
+            <div class="card-header">
+                <h3 class="card-title">Vodafone</h3>
+            </div>
+            <div class="code-display">
+                ${code.match(/.{1,4}/g).join(' ')}
+                <button class="copy-btn" onclick="copyCode('${code}')">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+            <div class="units-display">الوحدات: ${units}</div>
+            <div class="website-url">veow.free.nf</div>
+            <div class="countdown">06:00:00</div>
+        `;
+
+        card.innerHTML = cardContent;
+        card.appendChild(newBadge);
+        cardsContainer.prepend(card);
+
+        // Remove new badge after 15 minutes
+        setTimeout(() => {
+            newBadge.remove();
+        }, 15 * 60 * 1000);
+
+        // Start countdown
+        let timeLeft = 6 * 60 * 60; // 6 hours in seconds
+        const countdownEl = card.querySelector('.countdown');
+        
+        const countdownInterval = setInterval(() => {
+            timeLeft--;
+            countdownEl.textContent = formatTime(timeLeft);
+            
+            if (timeLeft <= 0) {
+                clearInterval(countdownInterval);
+                card.remove();
+            }
+        }, 1000);
+    }
+    </script>
+</body>
+  </html>
