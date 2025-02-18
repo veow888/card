@@ -321,6 +321,14 @@
         font-size: 0.9rem;
     }
 
+    .logo-image {
+        position: absolute;
+        bottom: 60px;
+        left: 10px;
+        width: 80px;
+        height: auto;
+    }
+
     .islamic-pattern {
         position: absolute;
         width: 100%;
@@ -472,6 +480,10 @@
             font-size: 1rem;
             padding: 0.8rem;
         }
+
+        .logo-image {
+            width: 60px;
+        }
     }
     </style>
 </head>
@@ -496,13 +508,13 @@
         <div class="create-card-modal">
             <button class="close-modal">&times;</button>
             <div class="card-header">
-                <h2>شانشاء بطاقة جديدة</h2>
+                <h2>إنشاء كارت</h2>
             </div>
             <div class="incentive-text">
-                انشر كارت الآن وزد فرصك للفوز بشحنة مجانية! كلما شاركت أكثر، زادت فرصك في دخول السحب والفوز بالجائزة. لا تفوّت الفرصة!
+                انشيء كارت الآن وزد فرصك للفوز بشحنة مجانية! كلما شاركت أكثر، زادت فرصك في دخول السحب والفوز بالجائزة. لا تفوّت الفرصة!
             </div>
             <div class="input-group">
-                <label for="cardCode">كود البطاقة (13 رقمًا):</label>
+                <label for="cardCode">كود الكارت (13 رقمًا):</label>
                 <input type="text" id="cardCode" placeholder="أدخل الكود هنا" maxlength="13" inputmode="numeric">
             </div>
             <div class="input-group">
@@ -510,7 +522,7 @@
                 <input type="number" id="cardUnits" placeholder="أدخل عدد الوحدات" min="1" max="9999" inputmode="numeric">
             </div>
             <div class="error-message" id="errorMessage"></div>
-            <button class="submit-btn" id="createCardBtn">إنشاء البطاقة</button>
+            <button class="submit-btn" id="createCardBtn">إنشاء الكارت</button>
         </div>
     </div>
 
@@ -544,6 +556,9 @@
     const createCardBtn = document.getElementById('createCardBtn');
     const cardsContainer = document.querySelector('.cards-container');
     const errorMessage = document.getElementById('errorMessage');
+
+    // Load saved cards on page load
+    window.addEventListener('DOMContentLoaded', loadSavedCards);
 
     floatingBtn.addEventListener('click', () => {
         modalOverlay.style.display = 'flex';
@@ -624,13 +639,55 @@
         document.getElementById('cardUnits').value = '';
     });
 
-    function createCard(code, units) {
+    function saveCardsToLocalStorage() {
+        const cards = [];
+        document.querySelectorAll('.card').forEach(card => {
+            const codeDisplay = card.querySelector('.code-display');
+            const code = codeDisplay.textContent.trim().replace(/\s+/g, '');
+            const units = card.querySelector('.units-display').textContent.replace('الوحدات: ', '');
+            const countdown = card.querySelector('.countdown').textContent;
+            
+            // Calculate remaining time
+            const [hours, minutes, seconds] = countdown.split(':').map(Number);
+            const timeLeft = hours * 3600 + minutes * 60 + seconds;
+            
+            // Get creation time by subtracting timeLeft from 6 hours
+            const creationTime = Date.now() - (6 * 3600 - timeLeft) * 1000;
+            
+            cards.push({
+                code,
+                units,
+                creationTime
+            });
+        });
+        
+        localStorage.setItem('vodafoneCards', JSON.stringify(cards));
+    }
+
+    function loadSavedCards() {
+        const savedCards = JSON.parse(localStorage.getItem('vodafoneCards') || '[]');
+        
+        savedCards.forEach(cardData => {
+            const now = Date.now();
+            const elapsedSeconds = Math.floor((now - cardData.creationTime) / 1000);
+            const timeLeft = 6 * 3600 - elapsedSeconds;
+            
+            // Only create card if there's time left
+            if (timeLeft > 0) {
+                createCard(cardData.code, cardData.units, timeLeft);
+            }
+        });
+    }
+
+    function createCard(code, units, timeLeftOverride = null) {
         const card = document.createElement('div');
         card.className = 'card';
         
         const newBadge = document.createElement('div');
         newBadge.className = 'new-badge';
         newBadge.textContent = 'جديد';
+        
+        const formattedCode = code.match(/.{1,4}/g).join(' ');
         
         const cardContent = `
             <div class="islamic-pattern"></div>
@@ -639,12 +696,13 @@
                 <h3 class="card-title">Vodafone</h3>
             </div>
             <div class="code-display">
-                ${code.match(/.{1,4}/g).join(' ')}
+                ${formattedCode}
                 <button class="copy-btn" onclick="copyCode('${code}')">
                     <i class="fas fa-copy"></i>
                 </button>
             </div>
             <div class="units-display">الوحدات: ${units}</div>
+            <img src="https://www2.0zz0.com/2025/02/13/19/971338323.png" alt="Vodafone Logo" class="logo-image">
             <div class="website-url">veow.free.nf</div>
             <div class="countdown">06:00:00</div>
         `;
@@ -659,19 +717,32 @@
         }, 15 * 60 * 1000);
 
         // Start countdown
-        let timeLeft = 6 * 60 * 60; // 6 hours in seconds
+        let timeLeft = timeLeftOverride !== null ? timeLeftOverride : 6 * 3600; // 6 hours in seconds
         const countdownEl = card.querySelector('.countdown');
+        countdownEl.textContent = formatTime(timeLeft);
         
         const countdownInterval = setInterval(() => {
             timeLeft--;
             countdownEl.textContent = formatTime(timeLeft);
             
+            // Save cards state after each minute
+            if (timeLeft % 60 === 0) {
+                saveCardsToLocalStorage();
+            }
+            
             if (timeLeft <= 0) {
                 clearInterval(countdownInterval);
                 card.remove();
+                saveCardsToLocalStorage();
             }
         }, 1000);
+        
+        // Save cards immediately after creating a new one
+        saveCardsToLocalStorage();
     }
+
+    // Save cards state when user leaves the page
+    window.addEventListener('beforeunload', saveCardsToLocalStorage);
     </script>
 </body>
-  </html>
+</html>
