@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ڤودافون - الكروت المجانية</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics-compat.js"></script>
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
 
@@ -212,7 +215,14 @@
         padding: 0.3rem 0.8rem;
         border-radius: 15px;
         font-weight: bold;
+        z-index: 10;
         animation: pulse 2s infinite;
+        opacity: 1;
+        transition: opacity 0.3s ease-out;
+    }
+
+    .new-badge.fade-out {
+        opacity: 0;
     }
 
     @keyframes pulse {
@@ -299,12 +309,6 @@
         text-align: center;
     }
 
-    .decorative-elements {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-    }
-
     .ramadan-text {
         position: absolute;
         top: 10px;
@@ -323,7 +327,7 @@
 
     .logo-image {
         position: absolute;
-        bottom: 60px;
+        bottom: 50px;
         left: 10px;
         width: 80px;
         height: auto;
@@ -337,14 +341,6 @@
         background: 
             linear-gradient(45deg, transparent 45%, rgba(255,215,0,0.1) 50%, transparent 55%),
             linear-gradient(-45deg, transparent 45%, rgba(255,215,0,0.1) 50%, transparent 55%);
-    }
-
-    .lantern {
-        position: absolute;
-        bottom: 20%;
-        left: 10%;
-        color: var(--gold);
-        font-size: 2rem;
     }
 
     .modal-overlay {
@@ -444,6 +440,14 @@
         margin-top: 1rem;
     }
 
+    .submit-btn:disabled {
+        background: #666 !important;
+        cursor: not-allowed;
+        opacity: 0.8;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+
     .submit-btn:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 15px rgba(225, 17, 17, 0.4);
@@ -531,6 +535,20 @@
     </button>
 
     <script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyCK7a-F6bKehWuZ7hwitAfmg5Jew0SWLj4",
+        authDomain: "veow-355b5.firebaseapp.com",
+        projectId: "veow-355b5",
+        storageBucket: "veow-355b5.firebasestorage.app",
+        messagingSenderId: "596821700560",
+        appId: "1:596821700560:web:16f446f8723fefa6a7d3d5",
+        measurementId: "G-RGR04CYN5W"
+    };
+
+    const app = firebase.initializeApp(firebaseConfig);
+    const analytics = firebase.analytics();
+    const db = firebase.firestore();
+
     const starsContainer = document.querySelector('.stars');
     const numberOfStars = 150;
 
@@ -556,9 +574,6 @@
     const createCardBtn = document.getElementById('createCardBtn');
     const cardsContainer = document.querySelector('.cards-container');
     const errorMessage = document.getElementById('errorMessage');
-
-    // Load saved cards on page load
-    window.addEventListener('DOMContentLoaded', loadSavedCards);
 
     floatingBtn.addEventListener('click', () => {
         modalOverlay.style.display = 'flex';
@@ -613,84 +628,59 @@
         return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
     }
 
-    createCardBtn.addEventListener('click', () => {
-        const code = document.getElementById('cardCode').value;
-        const units = document.getElementById('cardUnits').value;
-
-        if (!code || !units) {
-            showError('الرجاء ملء جميع الحقول');
-            return;
-        }
-
-        if (code.length !== 13) {
-            showError('الكود يجب أن يكون 13 رقمًا');
-            return;
-        }
-
-        if (units < 1 || units > 9999) {
-            showError('عدد الوحدات يجب أن يكون بين 1 و 9999');
-            return;
-        }
-
-        createCard(code, units);
-        modalOverlay.style.display = 'none';
-        errorMessage.style.display = 'none';
-        document.getElementById('cardCode').value = '';
-        document.getElementById('cardUnits').value = '';
-    });
-
-    function saveCardsToLocalStorage() {
-        const cards = [];
-        document.querySelectorAll('.card').forEach(card => {
-            const codeDisplay = card.querySelector('.code-display');
-            const code = codeDisplay.textContent.trim().replace(/\s+/g, '');
-            const units = card.querySelector('.units-display').textContent.replace('الوحدات: ', '');
-            const countdown = card.querySelector('.countdown').textContent;
+    async function isCodeUnique(code) {
+        try {
+            const snapshot = await db.collection('cards')
+                .where('code', '==', code)
+                .get();
             
-            // Calculate remaining time
-            const [hours, minutes, seconds] = countdown.split(':').map(Number);
-            const timeLeft = hours * 3600 + minutes * 60 + seconds;
-            
-            // Get creation time by subtracting timeLeft from 6 hours
-            const creationTime = Date.now() - (6 * 3600 - timeLeft) * 1000;
-            
-            cards.push({
-                code,
-                units,
-                creationTime
-            });
-        });
-        
-        localStorage.setItem('vodafoneCards', JSON.stringify(cards));
+            return snapshot.empty;
+        } catch (error) {
+            console.error("Error checking code:", error);
+            return false;
+        }
     }
 
-    function loadSavedCards() {
-        const savedCards = JSON.parse(localStorage.getItem('vodafoneCards') || '[]');
-        
-        savedCards.forEach(cardData => {
-            const now = Date.now();
-            const elapsedSeconds = Math.floor((now - cardData.creationTime) / 1000);
-            const timeLeft = 6 * 3600 - elapsedSeconds;
-            
-            // Only create card if there's time left
-            if (timeLeft > 0) {
-                createCard(cardData.code, cardData.units, timeLeft);
+    async function createCard(code, units) {
+        try {
+            const isUnique = await isCodeUnique(code);
+            if (!isUnique) {
+                showError('هذا الكود مُسجل مسبقًا');
+                return;
             }
-        });
+
+            const docRef = await db.collection('cards').add({
+                code: code,
+                units: units,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                expiresAt: new Date(Date.now() + 6 * 60 * 60 * 1000)
+            });
+            
+            analytics.logEvent('card_created');
+            modalOverlay.style.display = 'none';
+            document.getElementById('cardCode').value = '';
+            document.getElementById('cardUnits').value = '';
+            errorMessage.style.display = 'none';
+        } catch (error) {
+            console.error("Error adding document: ", error);
+            showError('حدث خطأ أثناء حفظ الكارت');
+        }
     }
 
-    function createCard(code, units, timeLeftOverride = null) {
+    function createCardElement(code, units, createdAt, expiresAt) {
         const card = document.createElement('div');
         card.className = 'card';
         
-        const newBadge = document.createElement('div');
-        newBadge.className = 'new-badge';
-        newBadge.textContent = 'جديد';
+        // Calculate if the card is new (less than 15 minutes old)
+        const timeSinceCreation = Date.now() - createdAt.getTime();
+        const isNew = timeSinceCreation < 15 * 60 * 1000; // 15 minutes in milliseconds
         
         const formattedCode = code.match(/.{1,4}/g).join(' ');
-        
+        const expirationTime = expiresAt.getTime();
+
         const cardContent = `
             <div class="islamic-pattern"></div>
+            ${isNew ? '<div class="new-badge">جديد</div>' : ''}
             <span class="ramadan-text">رمضان مبارك</span>
             <div class="card-header">
                 <h3 class="card-title">Vodafone</h3>
@@ -704,45 +694,93 @@
             <div class="units-display">الوحدات: ${units}</div>
             <img src="https://www2.0zz0.com/2025/02/13/19/971338323.png" alt="Vodafone Logo" class="logo-image">
             <div class="website-url">veow.free.nf</div>
-            <div class="countdown">06:00:00</div>
+            <div class="countdown" data-expiration="${expirationTime}">06:00:00</div>
         `;
 
         card.innerHTML = cardContent;
-        card.appendChild(newBadge);
         cardsContainer.prepend(card);
 
-        // Remove new badge after 15 minutes
-        setTimeout(() => {
-            newBadge.remove();
-        }, 15 * 60 * 1000);
-
-        // Start countdown
-        let timeLeft = timeLeftOverride !== null ? timeLeftOverride : 6 * 3600; // 6 hours in seconds
-        const countdownEl = card.querySelector('.countdown');
-        countdownEl.textContent = formatTime(timeLeft);
-        
-        const countdownInterval = setInterval(() => {
-            timeLeft--;
-            countdownEl.textContent = formatTime(timeLeft);
+        // Set timeout to remove the badge after the remaining time
+        if (isNew) {
+            const newBadge = card.querySelector('.new-badge');
+            const remainingTime = (15 * 60 * 1000) - timeSinceCreation;
             
-            // Save cards state after each minute
-            if (timeLeft % 60 === 0) {
-                saveCardsToLocalStorage();
-            }
-            
-            if (timeLeft <= 0) {
-                clearInterval(countdownInterval);
-                card.remove();
-                saveCardsToLocalStorage();
-            }
-        }, 1000);
-        
-        // Save cards immediately after creating a new one
-        saveCardsToLocalStorage();
+            setTimeout(() => {
+                if (newBadge) {
+                    newBadge.classList.add('fade-out');
+                    setTimeout(() => {
+                        if (newBadge.parentNode) {
+                            newBadge.remove();
+                        }
+                    }, 300); // Wait for fade out animation
+                }
+            }, remainingTime);
+        }
     }
 
-    // Save cards state when user leaves the page
-    window.addEventListener('beforeunload', saveCardsToLocalStorage);
+    function loadCards() {
+        db.collection("cards")
+        .where("expiresAt", ">", new Date())
+        .onSnapshot((querySnapshot) => {
+            cardsContainer.innerHTML = '';
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                createCardElement(data.code, data.units, data.createdAt.toDate(), data.expiresAt.toDate());
+            });
+        });
+    }
+
+    function startCountdownUpdater() {
+        setInterval(() => {
+            document.querySelectorAll('.countdown').forEach(countdownEl => {
+                const expiration = parseInt(countdownEl.dataset.expiration);
+                const timeLeft = Math.max(0, Math.floor((expiration - Date.now()) / 1000));
+                countdownEl.textContent = formatTime(timeLeft);
+                
+                if (timeLeft <= 0) {
+                    const card = countdownEl.closest('.card');
+                    if (card) {
+                        card.remove();
+                    }
+                }
+            });
+        }, 1000);
+    }
+
+    createCardBtn.addEventListener('click', async () => {
+        const code = document.getElementById('cardCode').value;
+        const units = document.getElementById('cardUnits').value;
+
+        if (!code || !units) {
+            showError('الرجاء ملء جميع الحقول');
+            return;
+        }
+
+        if (code.length !== 13 || isNaN(code)) {
+            showError('الكود يجب أن يكون 13 رقمًا');
+            return;
+        }
+
+        if (units < 1 || units > 9999 || isNaN(units)) {
+            showError('عدد الوحدات يجب أن يكون بين 1 و 9999');
+            return;
+        }
+
+        createCardBtn.disabled = true;
+        createCardBtn.innerHTML = 'جاري التحقق... <i class="fas fa-spinner fa-spin"></i>';
+
+        try {
+            await createCard(code, units);
+        } finally {
+            createCardBtn.disabled = false;
+            createCardBtn.innerHTML = 'إنشاء الكارت';
+        }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+        loadCards();
+        startCountdownUpdater();
+    });
     </script>
 </body>
-</html>
+                    </html>
