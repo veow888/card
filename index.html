@@ -187,6 +187,8 @@
         position: relative;
         z-index: 2;
         padding-bottom: 120px;
+        margin: 0 auto;
+        max-width: 1200px;
     }
 
     .card {
@@ -200,6 +202,7 @@
         border: 2px solid var(--gold);
         min-height: 280px;
         transition: transform 0.3s ease;
+        margin: 0 auto;
     }
 
     .card:hover {
@@ -461,6 +464,7 @@
     @media (max-width: 768px) {
         .vodafone-title {
             font-size: 2.5rem;
+            margin: 1rem 0;
         }
         
         .floating-button {
@@ -471,13 +475,24 @@
             bottom: 1rem;
         }
 
-        .card {
-            min-height: 220px;
+        .content {
             padding: 1rem;
         }
 
         .cards-container {
+            grid-template-columns: 1fr;
+            padding: 1rem;
+            gap: 1rem;
+            max-width: 100%;
             padding-bottom: 90px;
+        }
+
+        .card {
+            min-height: 220px;
+            padding: 1rem;
+            margin: 0 auto;
+            width: 100%;
+            max-width: 350px;
         }
 
         .incentive-text {
@@ -488,6 +503,85 @@
         .logo-image {
             width: 60px;
         }
+
+        .create-card-modal {
+            width: 95%;
+            padding: 1.5rem;
+        }
+
+        .input-group input {
+            padding: 0.8rem;
+            font-size: 1rem;
+        }
+    }
+
+    /* Remove blue outline on button press */
+    button:focus,
+    .floating-button:focus,
+    .copy-btn:focus,
+    .close-modal:focus,
+    .submit-btn:focus {
+        outline: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Increase card size on desktop */
+    @media (min-width: 1024px) {
+        .card {
+            min-height: 320px;
+            width: 340px;
+            padding: 2rem;
+            transform-origin: center;
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+        }
+        
+        .code-display {
+            font-size: 1.4rem;
+            padding: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .units-display {
+            font-size: 1.1rem;
+            padding: 0.7rem 1.2rem;
+        }
+        
+        .logo-image {
+            width: 100px;
+            bottom: 60px;
+        }
+        
+        .website-url {
+            bottom: 50px;
+            font-size: 1.1rem;
+        }
+        
+        .countdown {
+            bottom: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .cards-container {
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 2rem;
+        }
+    }
+
+    /* Additional fix for Firefox which may still show outline */
+    button::-moz-focus-inner,
+    input::-moz-focus-inner {
+        border: 0;
+    }
+
+    /* Prevent all element selection/highlighting when tapping */
+    * {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
     }
     </style>
 </head>
@@ -645,7 +739,7 @@
         try {
             const isUnique = await isCodeUnique(code);
             if (!isUnique) {
-                showError('هذا الكود مُسجل مسبقًا');
+                showError('هذا الكارت قد تم نشرة من قبل');
                 return;
             }
 
@@ -671,9 +765,8 @@
         const card = document.createElement('div');
         card.className = 'card';
         
-        // Calculate if the card is new (less than 15 minutes old)
         const timeSinceCreation = Date.now() - createdAt.getTime();
-        const isNew = timeSinceCreation < 15 * 60 * 1000; // 15 minutes in milliseconds
+        const isNew = timeSinceCreation < 15 * 60 * 1000;
         
         const formattedCode = code.match(/.{1,4}/g).join(' ');
         const expirationTime = expiresAt.getTime();
@@ -700,7 +793,6 @@
         card.innerHTML = cardContent;
         cardsContainer.prepend(card);
 
-        // Set timeout to remove the badge after the remaining time
         if (isNew) {
             const newBadge = card.querySelector('.new-badge');
             const remainingTime = (15 * 60 * 1000) - timeSinceCreation;
@@ -712,7 +804,7 @@
                         if (newBadge.parentNode) {
                             newBadge.remove();
                         }
-                    }, 300); // Wait for fade out animation
+                    }, 300);
                 }
             }, remainingTime);
         }
@@ -767,7 +859,7 @@
         }
 
         createCardBtn.disabled = true;
-        createCardBtn.innerHTML = 'جاري التحقق... <i class="fas fa-spinner fa-spin"></i>';
+        createCardBtn.innerHTML = 'جاري الإنشاء... <i class="fas fa-spinner fa-spin"></i>';
 
         try {
             await createCard(code, units);
@@ -783,4 +875,4 @@
     });
     </script>
 </body>
-                    </html>
+</html>
