@@ -219,7 +219,6 @@ body {
     z-index: 1;
 }
 
-/* نظام الإحالة الجديد */
 .referral-section {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
@@ -408,19 +407,16 @@ body {
   let referralCount = parseInt(localStorage.getItem('referralCount')) || 0;
   let referralPoints = parseInt(localStorage.getItem('referralPoints')) || 0;
 
-  // إنشاء ID فريد للمستخدم إذا لم يكن موجود
   if (!userId) {
     userId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
     localStorage.setItem('userId', userId);
   }
 
-  // توليد رابط الإحالة
   function generateReferralLink() {
     const baseUrl = window.location.origin;
     return `${baseUrl}?ref=${userId}`;
   }
 
-  // نسخ الرابط
   function copyReferralLink() {
     const input = document.getElementById('referralLink');
     input.select();
@@ -428,23 +424,23 @@ body {
     showNotification('تم نسخ الرابط بنجاح!');
   }
 
-  // معالجة الإحالة عند دخول المستخدم
   function handleReferral() {
     const urlParams = new URLSearchParams(window.location.search);
     const refId = urlParams.get('ref');
     
     if (refId && refId !== userId) {
-      const referrer = localStorage.getItem(refId);
-      
-      if (!referrer) {
-        // منع الاحتيال: كل مستخدم يمكنه الاحالة مرة واحدة فقط
-        localStorage.setItem(refId, 'used');
+      const visitorId = 'visitor_' + Date.now();
+      const isNewVisitor = !localStorage.getItem(visitorId);
+
+      if (isNewVisitor) {
+        // تسجيل الزائر لمنع التكرار
+        localStorage.setItem(visitorId, 'visited');
         
-        // زيادة نقاط المُحال
-        referralPoints += 100;
-        localStorage.setItem('referralPoints', referralPoints);
+        // منح النقاط للمُحيل
+        const referrerPoints = parseInt(localStorage.getItem(`${refId}_points`)) || 0;
+        localStorage.setItem(`${refId}_points`, referrerPoints + 100);
         
-        // زيادة عدد الاحالات للمُحيل
+        // زيادة عدد الإحالات للمُحيل
         const referrerCount = parseInt(localStorage.getItem(`${refId}_count`)) || 0;
         localStorage.setItem(`${refId}_count`, referrerCount + 1);
         
@@ -453,15 +449,16 @@ body {
     }
   }
 
-  // تحديث واجهة المستخدم
   function updateUI() {
-    document.getElementById('userBalance').textContent = referralPoints;
-    document.getElementById('referralCount').textContent = localStorage.getItem(`${userId}_count`) || 0;
-    document.getElementById('referralPoints').textContent = referralPoints;
+    const userPoints = parseInt(localStorage.getItem(`${userId}_points`)) || 0;
+    const userReferrals = parseInt(localStorage.getItem(`${userId}_count`)) || 0;
+    
+    document.getElementById('userBalance').textContent = userPoints;
+    document.getElementById('referralCount').textContent = userReferrals;
+    document.getElementById('referralPoints').textContent = userPoints;
     document.getElementById('referralLink').value = generateReferralLink();
   }
 
-  // عرض الإشعارات
   function showNotification(text) {
     const notification = document.createElement('div');
     notification.className = 'notification show';
@@ -476,7 +473,6 @@ body {
     }, 3000);
   }
 
-  // التمرير وإدارة الحالة
   function handleScroll() {
     const currentScroll = window.pageYOffset;
     const header = document.querySelector('.header');
@@ -491,14 +487,12 @@ body {
     }
   }
 
-  // تهيئة الصفحة
   window.addEventListener('load', () => {
     window.addEventListener('scroll', handleScroll);
     handleReferral();
     updateUI();
   });
 
-  // إنشاء النجوم
   const starsContainer = document.querySelector('.stars');
   for (let i = 0; i < 150; i++) {
     const star = document.createElement('div');
